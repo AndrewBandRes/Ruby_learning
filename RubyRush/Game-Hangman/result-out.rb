@@ -60,7 +60,7 @@ class ResultOut
       if good_letters.include?(item)
         result += item + " "        
       else
-        result += "__ "
+        result += "_ "
       end
     end
 

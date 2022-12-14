@@ -38,7 +38,7 @@ class Game
     return if @status == -1 || @status == 1
     return if @good_letters.include?(letter) || @bad_letters.include?(letter)
     
-    if !(@letters.include?(letter) || @letters.include?(friends_letters[letter]))
+    unless @letters.include?(letter) || @letters.include?(friends_letters[letter])
       @bad_letters << letter
       
       @errors += 1

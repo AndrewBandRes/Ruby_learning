@@ -47,10 +47,11 @@ rescue ArgumentError
     sleep 1
     words_file_name = File.dirname(__FILE__) + "/data/words.txt"
     game = Game.new(word_reader.read_from_file(words_file_name))
-  rescue SystemCallError
+  rescue SystemCallError, ArgumentError
+    puts "Failed"
     puts
-    puts "There is no argument for Hangman.rb \n"
-    puts "File /data/words.txt not found \n"
+    puts "There is no argument for hangman.rb \n"
+    puts "File /data/words.txt contains invalid word or not found \n"
     abort "Hidden word required. Please, try again"
   end
 end

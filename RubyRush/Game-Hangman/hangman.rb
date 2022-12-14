@@ -36,10 +36,15 @@ word_reader = WordReader.new
 
 begin
   # Checking does ARGS has a word
+  puts "Reading hidden word from argument..."
+  sleep 1
   game = Game.new(word_reader.read_from_args)
 rescue ArgumentError
   begin
     # Cheking file existance
+    puts "Failed"
+    puts "Reading words from file..."
+    sleep 1
     words_file_name = File.dirname(__FILE__) + "/data/words.txt"
     game = Game.new(word_reader.read_from_file(words_file_name))
   rescue SystemCallError

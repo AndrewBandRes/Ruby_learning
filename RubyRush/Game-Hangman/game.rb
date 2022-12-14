@@ -13,7 +13,7 @@ class Game
   def get_letters(word)
     raise ArgumentError.new (
       "There is no any word. Try again"
-    ) if word == nil || word == ""
+    ) if word == nil || word == "" || !(word =~ /^[a-zA-Zа-яА-я]/)
 
     # Change the case of a word to uppercase with UnicodeUtils
     word = UnicodeUtils.upcase(word.encode('UTF-8'))
@@ -27,34 +27,30 @@ class Game
 
   def next_step(letter)
     letter = UnicodeUtils.upcase(letter)
+    
+    friends_letters = {
+      'Е' => 'Ё',
+      'Ё' => 'Е', 
+      'Й' => 'И', 
+      'И' => 'Й' 
+    } 
 
-    if @status == -1 || @status == 1
-      return
-    end
-
-    if @good_letters.include?(letter) || @bad_letters.include?(letter)
-      return
-    end
-
-    if @letters.include?(letter) ||
-      (letter == 'Е' && @letters.include?('Ё')) ||
-      (letter == 'Ё' && @letters.include?('Е')) ||
-      (letter == 'И' && @letters.include?('Й')) ||
-      (letter == 'Й' && @letters.include?('И'))
-      @good_letters << letter
-
-      @good_letters << 'Ё' if letter == 'Е'
-      @good_letters << 'Е' if letter == 'Ё'
-      @good_letters << 'Й' if letter == 'И'
-      @good_letters << 'И' if letter == 'Й'
-
-      @status = 1 if (letters - good_letters).empty?
-    else
+    return if @status == -1 || @status == 1
+    return if @good_letters.include?(letter) || @bad_letters.include?(letter)
+    
+    if !(@letters.include?(letter) || @letters.include?(friends_letters[letter]))
       @bad_letters << letter
+      
       @errors += 1
-
-      @status = -1 if @errors >= 7
+      return @status = -1 if @errors >= 7
+      
+      return
     end
+    
+    @good_letters << letter  
+    @good_letters << friends_letters[letter] if friends_letters.has_key?(letter)
+    
+    @status = 1 if (letters - good_letters).empty?
   end
 
   def ask_next_letter

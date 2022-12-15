@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
 # Main class of Hangman game with methods for continuing the progress
 class Game
@@ -10,73 +11,65 @@ class Game
     @status = 0
   end
 
+  # Method for definig hidden word
   def get_letters(word)
-    raise ArgumentError.new (
-      "There is no any word. Try again"
-    ) if word == nil || word == "" || !(word =~ /^[a-zA-Zа-яА-я]/)
+    # Checking if word is valid
+    raise ArgumentError if word.nil? || word == '' || word !~ /^[a-zA-Zа-яА-я]/
 
-    # Change the case of a word to uppercase with UnicodeUtils
-    word = UnicodeUtils.upcase(word.encode('UTF-8'))
-
-    return word.split("")
+    # Changing the case of a word to uppercase
+    word.upcase.split('')
   end
 
-  def status
-    return @status
-  end
+  attr_reader :status, :errors, :letters, :good_letters, :bad_letters
 
-  def next_step(letter)
-    letter = UnicodeUtils.upcase(letter)
-    
-    friends_letters = {
-      'Е' => 'Ё',
-      'Ё' => 'Е', 
-      'Й' => 'И', 
-      'И' => 'Й' 
-    } 
-
-    return if @status == -1 || @status == 1
-    return if @good_letters.include?(letter) || @bad_letters.include?(letter)
-    
-    unless @letters.include?(letter) || @letters.include?(friends_letters[letter])
-      @bad_letters << letter
-      
-      @errors += 1
-      return @status = -1 if @errors >= 7
-      
-      return
-    end
-    
-    @good_letters << letter  
-    @good_letters << friends_letters[letter] if friends_letters.has_key?(letter)
-    
-    @status = 1 if (letters - good_letters).empty?
-  end
-
+  # Method for getting players input
+  # Repeats until status == 1 (win) or status == -1 (lose)
   def ask_next_letter
     puts "\nInput next letter"
 
-    letter = ""
-    while letter == ""
-      letter = STDIN.gets.encode("UTF-8").chomp
-    end
+    letter = ''
+    letter = $stdin.gets.chomp while letter == ''
 
     next_step(letter)
   end
 
-  def errors
-    @errors
+  # Method for evaluation of players letter input
+  def next_step(letter)
+    letter = letter.upcase
+
+    friends_letters = {
+      'Е' => 'Ё',
+      'Ё' => 'Е',
+      'Й' => 'И',
+      'И' => 'Й'
+    }
+
+    # Checking if game status has already changed
+    # or player repeated same letter again
+    return if @status == -1 || @status == 1 || @good_letters.include?(letter) || @bad_letters.include?(letter)
+    # If players guess was bad
+    return add_bad_letter(letter) unless @letters.include?(letter) || @letters.include?(friends_letters[letter])
+
+    # If players guess was good
+    add_good_letter(letter, friends_letters)
   end
 
-  def letters
-    @letters
+  # Method for adding bad letter
+  # and increasing count of errors
+  def add_bad_letter(letter)
+    @bad_letters << letter
+
+    @errors += 1
+    # Checking if players has any tries left
+    @status = -1 if @errors >= 7
   end
 
-  def good_letters
-    @good_letters
-  end
+  # Method for adding good letter and it friends
+  # and checking if player has won
+  def add_good_letter(letter, friends_letters)
+    @good_letters << letter
+    @good_letters << friends_letters[letter] if friends_letters.key?(letter)
 
-  def bad_letters
-    @bad_letters
+    @status = 1 if (letters - good_letters).empty?
   end
 end
